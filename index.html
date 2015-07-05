@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>calendar</title>
+    <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 <div class="date-picker">
     <div class="calendar-header">
-        <select name="calendar-select-year">
+        <select class="calendar-select-year">
             <option value="0">2015</option>
         </select>
-        <select name="calendar-select-month">
+        <select class="calendar-select-month">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -25,8 +26,8 @@
             <option value="11">11</option>
             <option value="12">12</option>
         </select>
-        <button type="button" class="calendar-prev">&lt;</button>
-        <button type="button" class="calendar-next">&gt;</button>
+        <button type="button" class="calendar-btn calendar-prev">&lt;</button>
+        <button type="button" class="calendar-btn calendar-next">&gt;</button>
     </div>
     <table class="calendar-table">
         <thead>
@@ -89,12 +90,12 @@
             <li>时间：</li>
             <li><input type="text" class="calendar-hours" value="18"/>：</li>
             <li><input type="text" class="calendar-minutes" value="36"/>：</li>
-            <li><input type="text" class="calendar-seconds" value="22"/>：</li>
+            <li><input type="text" class="calendar-seconds" value="22"/></li>
         </ul>
         <div class="calendar-buttons">
-            <a href="javascript:;" class="canlendar-clear">清空</a>
-            <a href="javascript:;" class="canlendar-today">今天</a>
-            <a href="javascript:;" class="canlendar-ok">确认</a>
+            <button type="button" class="calendar-btn calendar-clear">清空</button>
+            <button type="button" class="calendar-btn calendar-today">今天</button>
+            <button type="button" class="calendar-btn calendar-ok">确认</button>
         </div>
     </div>
 </div>

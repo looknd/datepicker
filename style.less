@@ -1,0 +1,135 @@
+.clearfix() {
+    &:before,
+    &:after {
+        display: table;
+        content: "";
+        line-height: 0;
+    }
+
+    &:after {
+        clear: both;
+    }
+
+    & {
+        *zoom: 1;
+    }
+}
+
+.linear-gradient(@direction, @start-color, @end-color) {
+    background: -webkit-linear-gradient(@direction, @start-color, @end-color);
+    background: -moz-linear-gradient(@direction, @start-color, @end-color);
+    background: -ms-linear-gradient(@direction, @start-color, @end-color);
+    background: -o-linear-gradient(@direction, @start-color, @end-color);
+    background: linear-gradient(@direction, @start-color, @end-color);
+    background-color: mix(@start-color,@end-color);
+}
+
+.date-picker {
+    padding: 4px;
+    width: 180px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+}
+
+.calendar-btn {
+    padding: 2px 7px;
+    height: 21px;
+    line-height: 15px;
+    color: #333;
+    outline: 0;
+    border: 1px solid #a4a4a4;
+    .linear-gradient(to bottom, #f6f6f6, #ddd);
+
+    &:active {
+        .linear-gradient(to bottom, #ddd, #f6f6f6);
+    }
+
+    &.active {
+        &:extend(.calendar-btn:active);
+    }
+}
+
+a.calendar-btn {
+    text-decoration: none;
+}
+
+//日历头部
+.calendar-header {
+    .clearfix();
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.calendar-select-year {
+    height: 21px;
+    border: 1px solid #a4a4a4;
+}
+
+.calendar-select-month {
+    &:extend(.calendar-select-year);
+}
+
+.calendar-prev {
+    float: left;
+}
+
+.calendar-next {
+    float: right;
+}
+
+//日历主体
+.calendar-table {
+    width: 100%;
+
+    th {
+        font-weight: bold;
+    }
+
+    td {
+        text-align: center;
+    }
+}
+
+
+//日历底部 - 时分秒
+.caleander-times {
+    margin-top: 0;
+    padding: 0;
+    list-style: none;
+    &:extend(.calendar-header all);
+
+    li {
+        float: left;
+    }
+}
+
+.calendar-hours {
+    padding: 2px;
+    width: 30px;
+    height: 15px;
+    border: 1px solid #a4a4a4;
+}
+
+.calendar-minutes {
+    &:extend(.calendar-hours);
+}
+
+.calendar-seconds {
+    &:extend(.calendar-hours);
+}
+
+//日历底部 - 按钮组
+.calendar-buttons {
+    .clearfix();
+    margin: 0 auto;
+    width: 124px;
+
+    .calendar-btn {
+        float: left;
+    }
+
+    .calendar-clear,
+    .calendar-today {
+        border-right: 0;
+    }
+}
