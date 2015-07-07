@@ -14,10 +14,10 @@
 
     //默认配置项
     var defaults = {
-        //绑定的表单元素
-        field: null,
+        //绑定的表单元素id
+        id: null,
 
-        //field 获取焦点时，是否自动显示picker
+        //获取焦点时，是否自动显示picker
         bound: undefined,
 
         //格式化日期
@@ -60,27 +60,27 @@
 
     //日历构造函数
     function DatePicker (options) {
-        options = options || {};
-
         var self = this;
     }
 
     DatePicker.prototype = {
         //配置函数
         config: function (options) {
-            var opts = util.extend()
+            if(!this._o) {
+                this._o = util.extend({}, defaults);
+            }
+            var opts = util.extend(this._o, options, true);
+
+            //处理id是否存在
+            var field = document.getElementById(opts.id);
+            this.field = (field && field.nodeName) ? field : null;
+
+            //处理自动显示
+
         },
 
-        show: function () {
-
-        },
-
-        hide: function () {
-
-        },
-
-        destroy: function () {
-
+        renderHeader: function () {
+            return ''
         }
     };
 
@@ -89,46 +89,32 @@
     var util = {
         /**
          * 检测是否是对象
-         * 需要注意的是，null不被认为是一个对象，array在javascript里被认为是一个对象
+         * 需要注意的是，此函数里null不被认为是一个对象，array在javascript里被认为是一个对象
          */
         isObject: function (value) {
             // http://jsperf.com/isobject4
             return value !== null && typeof value === 'object';
         },
         
-        isFunction: function (value) {
-            return typeof value === 'function';
-        },
+        extend: function (to, from, overwrite) {
+            overwrite = overwrite || false;
+            var prop, hasProp;
 
-        /**
-         * 合并对象，将源对象的所有属性复制到目标对象上
-         * @param destination   {object}    目标对象
-         * @param source        {object}    [可选]源对象
-         * @param deep          {boolean}   [可选]是否复制(继承)对象中的对象，默认：false
-         * @returns {object}                返回继承了source对象属性的新对象
-         */
-        extend: function (destination, source, deep) {
+            for(prop in from) {
+                hasProp = to[prop] !== undefined;
 
-            for(var i = 0, j = source.length; i < j; ++i) {
-                var obj = source[i];
-
-                if (!util.isObject(obj) && !util.isFunction(obj)) continue;
-                var keys = Object.keys(obj);
-
-                for(var m = 0, n = keys.length; m < n; ++m) {
-                    var key = keys[i], src = obj[key];
-
-                    if(deep && util.isObject(src)) {
-                        if(!util.isObject(destination[key])) {
-                            destination[key] = isArray(src) ? [] : {};
-                        }
-                        util.extend(destination[key], [src], true);
+                if(hasProp && util.isObject(from[prop])) {
+                    //存在相同属性，需要覆盖合并时，且form的属性为object, 递归合并
+                    if(overwrite) {
+                        util.extend(to[prop], from[prop], overwrite);
                     }
+                } else if(!hasProp || overwrite) {
+                    //不存在相同属性或需要覆盖合并时, 将此属性添加到 to 里
+                    to[prop] = from[prop];
                 }
             }
 
-
-            return destination;
+            return to;
         }
     };
 

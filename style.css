@@ -1,0 +1,107 @@
+.date-picker {
+  padding: 4px;
+  width: 180px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+}
+.calendar-btn {
+  padding: 2px 7px;
+  height: 21px;
+  line-height: 15px;
+  color: #333;
+  outline: 0;
+  border: 1px solid #a4a4a4;
+  background: -webkit-linear-gradient(to bottom, #f6f6f6, #dddddd);
+  background: -moz-linear-gradient(to bottom, #f6f6f6, #dddddd);
+  background: -ms-linear-gradient(to bottom, #f6f6f6, #dddddd);
+  background: -o-linear-gradient(to bottom, #f6f6f6, #dddddd);
+  background: linear-gradient(to bottom, #f6f6f6, #dddddd);
+  background-color: #eaeaea;
+}
+.calendar-btn:active,
+.calendar-btn.active {
+  background: -webkit-linear-gradient(to bottom, #dddddd, #f6f6f6);
+  background: -moz-linear-gradient(to bottom, #dddddd, #f6f6f6);
+  background: -ms-linear-gradient(to bottom, #dddddd, #f6f6f6);
+  background: -o-linear-gradient(to bottom, #dddddd, #f6f6f6);
+  background: linear-gradient(to bottom, #dddddd, #f6f6f6);
+  background-color: #eaeaea;
+}
+a.calendar-btn {
+  text-decoration: none;
+}
+.calendar-header,
+.caleander-times {
+  *zoom: 1;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.calendar-header:before,
+.calendar-header:after,
+.caleander-times:before,
+.caleander-times:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.calendar-header:after,
+.caleander-times:after {
+  clear: both;
+}
+.calendar-select-year,
+.calendar-select-month {
+  height: 21px;
+  border: 1px solid #a4a4a4;
+}
+.calendar-prev {
+  float: left;
+}
+.calendar-next {
+  float: right;
+}
+.calendar-table {
+  width: 100%;
+}
+.calendar-table th {
+  font-weight: bold;
+}
+.calendar-table td {
+  text-align: center;
+}
+.caleander-times {
+  margin-top: 0;
+  padding: 0;
+  list-style: none;
+}
+.caleander-times li {
+  float: left;
+}
+.calendar-hours,
+.calendar-minutes,
+.calendar-seconds {
+  padding: 2px;
+  width: 30px;
+  height: 15px;
+  border: 1px solid #a4a4a4;
+}
+.calendar-buttons {
+  *zoom: 1;
+  margin: 0 auto;
+  width: 124px;
+}
+.calendar-buttons:before,
+.calendar-buttons:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.calendar-buttons:after {
+  clear: both;
+}
+.calendar-buttons .calendar-btn {
+  float: left;
+}
+.calendar-buttons .calendar-clear,
+.calendar-buttons .calendar-today {
+  border-right: 0;
+}
