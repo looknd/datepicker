@@ -17,14 +17,11 @@
         // 绑定的表单元素id
         id: null,
 
-        // 格式化日期
+        // 格式化日期，可选项：'YYYY/MM/DD', 'YYYY年MM月DD日'
         format: 'YYYY-MM-DD',
 
         // 初始化的值
         defaultDate: null,
-
-        // 初始化时，是否显示值
-        setDefaultDate: false,
 
         // 一周的开始星期（0: sunday, 1: monday etc.）
         firstDay: 0,
@@ -52,38 +49,112 @@
 
     // 日历构造函数
     function DatePicker(options) {
-
+        var self = this,
+            opts = self.config(options);
+        this.draw();
     }
 
-    // 对外开放的API
     DatePicker.prototype = {
-        // 配置函数
+        // 配置处理函数及设置常用属性
         config: function (options) {
             if (!this._o) {
-                this._o = util.extend({}, defaults);
+                this._o = extend({}, defaults);
             }
-            var opts = util.extend(this._o, options, true);
+            var opts = extend(this._o, options, true);
 
-            // 处理id是否存在
+            // 检测Id是否存在
             var field = document.getElementById(opts.id);
             this.field = (field && field.nodeName) ? field : null;
+
+            // 最大和最小日期
+            var minYear = parseInt(new Date(opts.minDate).getFullYear());
+            var maxYear = parseInt(new Date(opts.maxDate).getFullYear());
+            opts.minDate = (minYear === 1970 || minYear > maxYear) ? '1900,01,01' : opts.minDate;
+            opts.maxDate = (maxYear === 1970 || minYear > maxYear) ? '2300,01,01' : opts.maxDate;
+
+            //当前日期
+            this.curDate = new Date();
+        },
+
+        // 生成日历的html
+        draw: function () {
+            var self = this, picker;
+
+            picker = document.createElement('div');
+            picker.className = 'date-picker';
+            picker.appendChild(self.pickerHeader());
+
+            document.body.appendChild(picker);
+        },
+
+        pickerHeader: function () {
+            var pickerHeader, pickerHeaderHtml, self = this;
+
+            pickerHeaderHtml = self.yearSelect(self._o.minDate, self._o.maxDate);
+            pickerHeaderHtml += self.monthSelect();
+            pickerHeaderHtml += '<button type="button" class="calendar-btn calendar-prev">&lt;</button>';
+            pickerHeaderHtml += '<button type="button" class="calendar-btn calendar-next">&gt;</button>';
+
+            pickerHeader = document.createElement('div');
+            pickerHeader.className = 'calendar-header';
+            pickerHeader.innerHTML = pickerHeaderHtml;
+
+            return pickerHeader;
+        },
+
+        // 年份下拉列表
+        yearSelect: function () {
+            var self = this, i, calendarYear, yearHtml,
+                startYear = new Date(self._o.minDate).getFullYear() - 1,
+                endYear = new Date(self._o.maxDate).getFullYear(),
+                curYear = self.curDate.getFullYear();
+
+            yearHtml = '<select name="calendar-select-year">';
+            for (i = endYear; i > startYear; i--) {
+                (curYear === i) ? yearHtml += '<option value="' + i + '" selected>' + i + '</option>'
+                                : yearHtml += '<option value="' + i + '">' + i + '</option>';
+            }
+            yearHtml += '</select>';
+
+            calendarYear = document.createElement('div');
+            calendarYear.className = '';
+            calendarYear.innerHTML = yearHtml;
+
+            return calendarYear;
+        },
+
+        // 月份下拉列表
+        monthSelect: function () {
+            var i, calendarMonth, monthHtml,
+                curMonth = this.curDate.getMonth() + 1;
+
+            monthHtml = '<select name="calendar-select-month">';
+            for(i = 1; i < 13; i++) {
+                (curMonth === i) ? monthHtml += '<option value="' + i + '" selected>' + i + '</option>'
+                                 : monthHtml += '<option value="' + i + '">' + i + '</option>';
+            }
+            monthHtml += '</select>';
+
+            calendarMonth = document.createElement('div');
+            calendarMonth.className = '';
+            calendarMonth.innerHTML = monthHtml;
+
+            return calendarMonth;
         }
     };
 
-
-    function renderHeader() {
-        var pickerHeaderHtml = '';
-        pickerHeaderHtml += '<select class="calendar-select-year">';
-        pickerHeaderHtml += '<option value="0">2015</option>';
-        pickerHeaderHtml += '</select>';
-    }
-
-    function getMonth() {
+    function getInDayMonth(month) {
 
     }
 
-    function getYear(year) {
+    // 格式化日期
+    function formatDate(date) {
 
+    }
+
+    // 检测是否是闰年
+    function isLeapYear(year) {
+        return (year % 4 === 0) && (year % 400 === 0) && (year % 100 !== 0);
     }
 
 
@@ -92,7 +163,6 @@
         // http://jsperf.com/isobject4
         return value !== null && typeof value === 'object';
     }
-
 
     //合并对象
     function extend(to, from, overwrite) {

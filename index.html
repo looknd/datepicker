@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-<div class="date-picker">
+<!--<div class="date-picker">
     <div class="calendar-header">
         <select class="calendar-select-year">
             <option value="0">2015</option>
@@ -98,6 +98,15 @@
             <button type="button" class="calendar-btn calendar-ok">确认</button>
         </div>
     </div>
-</div>
+</div>-->
+
+<input type="text" id="start"/>
+
+<script src="datapicker.js"></script>
+<script>
+    new datepicker({
+        id: 'start'
+    })
+</script>
 </body>
 </html>
