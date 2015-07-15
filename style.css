@@ -53,6 +53,10 @@ a.calendar-btn {
   height: 21px;
   border: 1px solid #a4a4a4;
 }
+.calendar-select {
+  display: inline-block;
+  margin: 0 3px;
+}
 .calendar-prev {
   float: left;
 }

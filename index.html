@@ -7,106 +7,21 @@
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-<!--<div class="date-picker">
-    <div class="calendar-header">
-        <select class="calendar-select-year">
-            <option value="0">2015</option>
-        </select>
-        <select class="calendar-select-month">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6" selected>6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-        </select>
-        <button type="button" class="calendar-btn calendar-prev">&lt;</button>
-        <button type="button" class="calendar-btn calendar-next">&gt;</button>
-    </div>
-    <table class="calendar-table">
-        <thead>
-        <tr>
-            <th>日</th>
-            <th>一</th>
-            <th>二</th>
-            <th>三</th>
-            <th>四</th>
-            <th>五</th>
-            <th>六</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-            <td>5</td>
-            <td>6</td>
-            <td>7</td>
-        </tr>
-        <tr>
-            <td>8</td>
-            <td>9</td>
-            <td>10</td>
-            <td>11</td>
-            <td>12</td>
-            <td>13</td>
-            <td>14</td>
-        </tr>
-        <tr>
-            <td>15</td>
-            <td>16</td>
-            <td>17</td>
-            <td>18</td>
-            <td>19</td>
-            <td>20</td>
-            <td>21</td>
-        </tr>
-        <tr>
-            <td>22</td>
-            <td>23</td>
-            <td>24</td>
-            <td>25</td>
-            <td>26</td>
-            <td>27</td>
-            <td>28</td>
-        </tr>
-        <tr>
-            <td>29</td>
-            <td>30</td>
-            <td>31</td>
-        </tr>
-        </tbody>
-    </table>
-    <div class="calendar-footer">
-        <ul class="caleander-times">
-            <li>时间：</li>
-            <li><input type="text" class="calendar-hours" value="18"/>：</li>
-            <li><input type="text" class="calendar-minutes" value="36"/>：</li>
-            <li><input type="text" class="calendar-seconds" value="22"/></li>
-        </ul>
-        <div class="calendar-buttons">
-            <button type="button" class="calendar-btn calendar-clear">清空</button>
-            <button type="button" class="calendar-btn calendar-today">今天</button>
-            <button type="button" class="calendar-btn calendar-ok">确认</button>
-        </div>
-    </div>
-</div>-->
-
 <input type="text" id="start"/>
 
 <script src="datapicker.js"></script>
 <script>
-    new datepicker({
-        id: 'start'
-    })
+    var start = new datepicker({
+        id: 'start',
+        firstDay: 6,
+        minDate: '1990/1/1',
+        maxDate: '2020/1/1'
+        /*i18n: {
+            month: ['1','2','3','4','5','6','7','8','9','10','11','12'],
+            weekdaysShot: ['sun','mon','tue','win','thu','fri','sat']
+        }*/
+    });
+    console.log(start)
 </script>
 </body>
 </html>
