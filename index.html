@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>calendar</title>
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="style/style.css"/>
 </head>
 <body>
-<input type="text" id="start"/>
+<input type="text" id="start" value=""/>
+<a id="a" href="###"></a>
 
-<script src="datapicker.js"></script>
+<script src="src/datapicker.js"></script>
 <script>
     var start = new datepicker({
         id: 'start',
-        firstDay: 6,
+        firstDay: 1,
         minDate: '1990/1/1',
         maxDate: '2020/1/1'
         /*i18n: {
@@ -22,6 +23,12 @@
         }*/
     });
     console.log(start)
+
+    var a = document.getElementById('start');
+    a.click = function () {
+        alert(1)
+    }
+    a.click();
 </script>
 </body>
 </html>

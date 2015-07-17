@@ -80,11 +80,6 @@
         return to;
     };
 
-    // 格式化日期
-    var formatDate = function (date) {
-
-    };
-
     // 获取一个月里有多少天
     function getDayInMonth(year) {
         var febDays = isLeapYear(year) ? 29 : 28;
@@ -134,7 +129,7 @@
             this.component = {};
         },
 
-        // 渲染整体日历组件
+        // 渲染日历整体HTML
         draw: function () {
             var self = this, cmp = self.component;
             cmp.picker = document.createElement('div');
@@ -214,7 +209,6 @@
         prevMonthBtn: function () {
             var  cmp = this.component;
             cmp.prevBtn = document.createElement('button');
-            cmp.prevBtn.type = 'button';
             cmp.prevBtn.className = 'calendar-btn calendar-prev';
             cmp.prevBtn.innerHTML = '&lt;';
 
@@ -225,7 +219,6 @@
         nextMonthBtn: function () {
             var  cmp = this.component;
             cmp.nextBtn = document.createElement('button');
-            cmp.nextBtn.type = 'button';
             cmp.nextBtn.className = 'calendar-btn calendar-next';
             cmp.nextBtn.innerHTML = '&gt;';
 
@@ -250,7 +243,23 @@
             return cmp.weekTitle;
         },
 
-        dayGrid: function (year, month) {
+        renderRow: function (days) {
+
+
+            return '<tr>' + days.join('') + '</tr>';
+        },
+
+        //渲染天数，并添加必要的状态
+        renderDay: function (cellOpts) {
+            cellOpts = cellOpts || {};
+            var cell, classArr = [];
+
+
+
+            cell = '<td class="' + classArr.join(' ') + '">' + cellOpts.day + '</td>'
+        },
+
+        getDayGrid: function (year, month) {
             var i, j, rowHtml, opt = this.options,
 
                 // 获取当前月份的总天数
@@ -265,13 +274,11 @@
                 // 获取当月最后一行需要的空白列
                 lastRowAfter = 7 - (totalDay + firstRowBefore) % 7,
 
-                //获取一个月所需要的表格行数
+                // 获取一个月所需要的表格行数
                 totalRow = Math.ceil((totalDay + firstRowBefore) / 7);
 
-            rowHtml = '';
             for (i = 0; i < totalRow; i++) {
-                rowHtml += '<tr>';
-                rowHtml += '</tr>';
+
             }
         }
     };
