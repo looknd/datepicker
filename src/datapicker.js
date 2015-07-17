@@ -254,9 +254,7 @@
             cellOpts = cellOpts || {};
             var cell, classArr = [];
 
-
-
-            cell = '<td class="' + classArr.join(' ') + '">' + cellOpts.day + '</td>'
+            cell = '<td class="' + classArr.join(' ') + '">' + cellOpts.day + '</td>';
         },
 
         getDayGrid: function (year, month) {
