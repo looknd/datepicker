@@ -243,18 +243,28 @@
             return cmp.weekTitle;
         },
 
-        renderRow: function (days) {
-
-
-            return '<tr>' + days.join('') + '</tr>';
-        },
-
-        //渲染天数，并添加必要的状态
+        // 渲染天数单元格，并添加必要的状态
         renderDay: function (cellOpts) {
-            cellOpts = cellOpts || {};
             var cell, classArr = [];
 
+            if(cellOpts.disabled) {
+                // 设置'禁用'状态
+                classArr.push('picker-cell-disabled');
+            } else if(cellOpts.selected) {
+                // 设置'选中'状态
+                classArr.push('picker-cell-selected');
+            } else if(cellOpts.empty) {
+                // 设置'空'状态
+                classArr.push('picker-cell-empty');
+            }
+
             cell = '<td class="' + classArr.join(' ') + '">' + cellOpts.day + '</td>';
+
+            return cell;
+        },
+
+        renderWeek: function () {
+
         },
 
         getDayGrid: function (year, month) {
