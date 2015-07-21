@@ -1,6 +1,6 @@
 .date-picker {
   padding: 4px;
-  width: 180px;
+  width: 202px;
   font-size: 14px;
   border: 1px solid #ccc;
 }
@@ -71,6 +71,17 @@ a.calendar-btn {
 }
 .calendar-table td {
   text-align: center;
+}
+.calendar-cell-disabled {
+  color: #ccc;
+}
+.calendar-cell-selected {
+  background-color: #f00;
+}
+.calendar-cell-empty {
+  font-size: 0;
+  text-indent: -9999em;
+  overflow: hidden;
 }
 .caleander-times {
   margin-top: 0;
