@@ -92,15 +92,20 @@
     // 日历构造函数
     // ============================
     var Picker = function (options) {
-        var self = this,
-            opts = self.config(options);
-        self.draw();
+        this.curDate = new Date();  // 当前日期
+        this.component = {};        // 日历Dom组件集合
+        this.cell = {};             // 日期单元格的集合
+        this.cell.monthCells = [];  // 当前月份的天数单元格
+        this.cell.prevCells = [];   // 上个月的倒数几天单元格
+        this.cell.afterCells = [];  // 下个月的开始几天单元格
+        this.config(options);
+        this.draw();
     };
 
     // 日历对象属性
     // ============================
     Picker.prototype = {
-        // 配置处理函数及添加常用对象属性
+        // 配置处理函数
         config: function (option) {
             if (!this.options) {
                 this.options = extend({}, defaults);
@@ -124,21 +129,6 @@
             var beforeDayShot = opt.i18n.weekdaysShot.slice(0, opt.firstDay);
             var afterDayShot = opt.i18n.weekdaysShot.slice(opt.firstDay);
             opt.i18n.weekdaysShot = afterDayShot.concat(beforeDayShot);
-
-            // 当前日期
-            this.curDate = new Date();
-
-            // 日历Dom组件集合
-            this.component = {};
-
-            // 当前显示的日期单元格集合，包括空白单元格
-            this.cells = [];
-
-            // 当前表格需要显示的上个月的倒数几天
-            this.prevMonthLastDays = [];
-
-            // 当前表格需要显示的下个月的开始几天
-            this.nextMonthFirstDays = [];
         },
 
         // 渲染日历整体HTML
@@ -178,7 +168,7 @@
             return cmp.pickerBody;
         },
 
-        // 年份下拉列表
+        // 年份下拉列表，并判断年份区间
         yearSelect: function () {
             var i, yearHtml, cmp = this.component,
                 startYear = new Date(this.options.minDate).getFullYear() - 1,
@@ -259,92 +249,40 @@
             return cmp.weekTitle;
         },
 
-        // 根据年月，来获取相应的日期表格
+        // 根据年月，来生成相应的日期表格
         dayGrid: function (year, month) {
-            var totalCell, monthBeforeCell,
+            var dayOpts, totalRow = [], totalCell = [],
+                cellObj = this.cell,
+                totalDay = getDayInMonth(year)[month],
+                curDay = parseInt(this.curDate.getDate());
 
-                // 一个星期第一天的星期数
-                weekFirst = parseInt(this.options.firstDay),
+            this.isFill(year, month);
 
-                // 一个月第一天的星期数
-                monthFirst = new Date(year, month, 1).getDay(),
-
-                // 第一个星期的空白单元格数量
-                before = (monthFirst >= weekFirst) ? (monthFirst - weekFirst) : (7 - weekFirst + monthFirst);
-
-            //当前月的总天数，上个月的总天数，第一个星期的空白单元格数量，最后一个星期空白单元格数量
-            this.totalDay = getDayInMonth(year)[month];
-            this.prevMonthTotalDay = getDayInMonth(year)[month - 1];
-            this.beforeMonth = (monthFirst >= weekFirst) ? (monthFirst - weekFirst) : (7 - weekFirst + monthFirst);
-            this.afterMonth = 7 - (this.beforeMonth + this.totalDay) % 7;
-
-            // 获取上个月的倒数几天
-            for (var i = 0; i < this.beforeMonth; i++) {
-                this.prevMonthLastDays.push(this.prevMonthTotalDay - i);
-            }
-            this.prevMonthLastDays = this.prevMonthLastDays.reverse();
-
-            // 获取下个月的前几天
-            for (var j = 0; j < this.afterMonth; j++) {
-                this.nextMonthFirstDays.push(j + 1);
+            // 获取当前月份的天数，并对当前天，添加选中状态
+            for (var i = 1; i <= totalDay; i++) {
+                dayOpts = {year: year, month: month, day: i};
+                (i === curDay) ? extend(dayOpts, {selected: true}) : dayOpts;
+                cellObj.monthCells.push(this.renderDay(dayOpts));
             }
 
-            // 循环遍历所有单元格（包括空白单元格）,并将其放进数组里
-            totalCell = this.beforeMonth + this.totalDay + this.afterMonth;
-            monthBeforeCell = this.beforeMonth + this.totalDay;
-            for (var k = 0; k <= totalCell; k++) {
-                // 判断一个月的第一天之前和最后一天之后的单元格是否填充空白
-                if(this.options.isFillBlank) {
-                    if(k < this.beforeMonth) {
-                        this.cells.push(this.renderDay({
-                            year: year,
-                            month: month - 1,
-                            day: this.prevMonthLastDays[k],    //填充上个月的倒数几天
-                            empty: true
-                        }));
-                    } else if(k > monthBeforeCell) {
-                        this.cells.push(this.renderDay({
-                            year: year,
-                            month: month + 1,
-                            day: this.nextMonthFirstDays[k - monthBeforeCell],    //填充下个月的开始几天
-                            empty: true
-                        }));
-                    }
-                } else {
-                    if(k < this.beforeMonth) {
-                        this.cells.push(this.renderDay({
-                            year: year,
-                            month: month - 1,
-                            day: this.prevMonthLastDays[k],    //填充上个月的倒数几天
-                            disabled: true
-                        }));
-                    } else if(k > monthBeforeCell) {
-                        this.cells.push(this.renderDay({
-                            year: year,
-                            month: month + 1,
-                            day: this.nextMonthFirstDays[k - monthBeforeCell],    //填充下个月的开始几天
-                            disabled: true
-                        }));
-                    }
-                }
+            // cells的数组连接顺序不能变
+            totalCell = cellObj.prevCells.concat(cellObj.monthCells, cellObj.afterCells);
 
-                // 添加正常的天数
-                if(k > this.beforeMonth && k <= this.beforeMonth + this.totalDay) {
-                    this.cells.push(this.renderDay({
-                        year: year,
-                        month: month,
-                        day: k - this.beforeMonth
-                    }));
+            // 将所有的单元格切割为长度为7的数组，并添加到tr里去
+            for (var j = 0; j < totalCell.length; j++) {
+                if(!(j % 7)) {
+                    totalRow.push(this.renderRow(totalCell.slice(j, j + 7)));
                 }
             }
 
             this.component.pickerGrid = document.createElement('tbody');
-            this.component.pickerGrid.innerHTML = this.cells.join('');
+            this.component.pickerGrid.innerHTML = totalRow.join('');
 
             return this.component.pickerGrid;
         },
 
-        renderWeek: function (days) {
+        // 渲染日期行
+        renderRow: function (days) {
             return '<tr>' + days.join('') + '</tr>';
         },
 
@@ -360,12 +298,50 @@
                 // 设置'选中'状态
                 classArr.push('calendar-cell-selected');
             } else if (cellOpts.empty) {
-                // 设置'空'状态
+                // 设置'空白'状态
                 classArr.push('calendar-cell-empty');
             }
 
-            cell = '<td class="' + classArr.join(' ') + '" data-date="' + dateStr +'">' + cellOpts.day + '</td>';
+            cell = '<td class="' + classArr.join(' ') + '" data-date="' + dateStr + '">' + cellOpts.day + '</td>';
             return cell;
+        },
+
+        // 获取月份的前后单元格，并判断是否添加'空白'状态
+        isFill: function (year, month) {
+            var prevOpts, afterOpts, cellObj = this.cell, isFb = this.options.isFillBlank,
+
+                // 一个月的总天数
+                totalDay = getDayInMonth(year)[month],
+
+                // 上一月的总天数
+                prevTotalDay = getDayInMonth(year)[month - 1],
+
+                // 一个星期第一天的星期数
+                weekFirst = parseInt(this.options.firstDay),
+
+                // 一个月第一天的星期数
+                monthFirst = new Date(year, month, 1).getDay(),
+
+                // 第一个星期的空白单元格数量
+                before = (monthFirst >= weekFirst) ? (monthFirst - weekFirst) : (7 - weekFirst + monthFirst),
+
+                // 最后一个星期空白单元格数量
+                after = 7 - (before + totalDay) % 7;
+
+            // 获取上个月的倒数几天，并判断是否添加'空白'状态
+            for (var i = 0; i < before; i++) {
+                prevOpts = {year: year, month: month, day: prevTotalDay - i};
+                isFb ? extend(prevOpts, {empty: true}) : extend(prevOpts, {disabled: true});
+                cellObj.prevCells.push(this.renderDay(prevOpts));
+            }
+            cellObj.prevCells = cellObj.prevCells.reverse();
+
+            // 获取下个月的前几天，并判断是否添加'空白'状态
+            for (var j = 0; j < after; j++) {
+                afterOpts = {year: year, month: month, day: j + 1};
+                isFb ? extend(afterOpts, {empty: true}) : extend(afterOpts, {disabled: true});
+                cellObj.afterCells.push(this.renderDay(afterOpts));
+            }
         }
     };
 
