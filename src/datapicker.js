@@ -62,7 +62,7 @@
         return value !== null && typeof value === 'object';
     };
 
-    //合并对象
+    // 合并对象
     var extend = function (to, from, overwrite) {
         overwrite = overwrite || false;
         var prop, hasProp;
@@ -189,7 +189,7 @@
             return cmp.pickerYear;
         },
 
-        // 月份下拉列表
+        // 月份下拉列表，并选中当前月份
         monthSelect: function () {
             var i, monthHtml,
                 cmp = this.component,
@@ -199,8 +199,8 @@
             monthHtml = '<select name="calendar-select-month">';
             for (i = 0; i < 12; i++) {
                 (curMonth === i)
-                    ? monthHtml += '<option value="' + monthOpt[i] + '" selected>' + monthOpt[i] + '</option>'
-                    : monthHtml += '<option value="' + monthOpt[i] + '">' + monthOpt[i] + '</option>';
+                    ? monthHtml += '<option value="' + i + '" selected>' + monthOpt[i] + '</option>'
+                    : monthHtml += '<option value="' + i + '">' + monthOpt[i] + '</option>';
             }
             monthHtml += '</select>';
 
@@ -265,12 +265,13 @@
                 cellObj.monthCells.push(this.renderDay(dayOpts));
             }
 
-            // cells的数组连接顺序不能变
+            // totalCell的数组连接顺序不能变
             totalCell = cellObj.prevCells.concat(cellObj.monthCells, cellObj.afterCells);
 
-            // 将所有的单元格切割为长度为7的数组，并添加到tr里去
+            // 将所有的单元格切割为长度为 7 的小数组，并添加到 tr 里去
             for (var j = 0; j < totalCell.length; j++) {
                 if(!(j % 7)) {
+                    console.log(j)
                     totalRow.push(this.renderRow(totalCell.slice(j, j + 7)));
                 }
             }
