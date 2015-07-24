@@ -45,7 +45,7 @@
         onSelect: null,
         onOpen: null,
         onClose: null,
-        onDraw: null
+        onRender: null
     };
 
     // 特征检测及工具函数
@@ -83,23 +83,58 @@
         return to;
     };
 
+    // 添加事件
+    var addEvent = function (node, event, callback, useCapture) {
+        if (!!window.addEventListener) {
+            node.addEventListener(event, callback, !!useCapture);
+        } else {
+            node.attachEvent('on' + event, callback);
+        }
+    };
+
+    // 检测是否具有匹配的css class
+    var hasClass = function (node, classStr) {
+        return new RegExp('(^|\\b)' + classStr + '(\\b|$)').test(node.className);
+    };
+
+    // 添加css class
+    var addClass = function (node, classStr) {
+        var oldClass = node.className;
+        var space = oldClass.length ? ' ' : '';
+        if (!hasClass(node, classStr)) {
+            node.className = oldClass + space + classStr;
+        }
+    };
+
+    // 删除css class
+    var removeClass = function (node, classStr) {
+        var oldClass = node.className;
+
+    };
+
     // 获取一个月里有多少天
-    function getDayInMonth(year) {
+    var getDayInMonth = function (year) {
         var febDays = isLeapYear(year) ? 29 : 28;
         return [31, febDays, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    }
+    };
 
     // 日历构造函数
     // ============================
     var Picker = function (options) {
-        this.curDate = new Date();  // 当前日期
-        this.component = {};        // 日历Dom组件集合
-        this.cell = {};             // 日期单元格的集合
-        this.cell.monthCells = [];  // 当前月份的天数单元格
-        this.cell.prevCells = [];   // 上个月的倒数几天单元格
-        this.cell.afterCells = [];  // 下个月的开始几天单元格
-        this.config(options);
-        this.draw();
+        var self = this;
+
+        self.config(options);
+        self.init();
+
+        // 日期天数选择，并判断是否为'空白'或'禁用'状态，如果是，则不触发事件
+        /*var isEmpty, isDisable, dayCell = self.component.pickerBody.getElementsByTagName('td');
+        for (var i = 0; i < dayCell.length; i++) {
+            isEmpty = hasClass(dayCell[i], 'calendar-cell-empty');
+            isDisable = hasClass(dayCell[i], 'calendar-cell-disabled');
+            if (!(isEmpty || isDisable)) {
+                addEvent(dayCell[i], 'click', self.pickDay);
+            }
+        }*/
     };
 
     // 日历对象属性
@@ -121,7 +156,7 @@
             var minYear = parseInt(new Date(opt.minDate).getFullYear());
             var maxYear = parseInt(new Date(opt.maxDate).getFullYear());
             opt.minDate = (opt.minDate === null || minYear > maxYear) ? '1900,01,01' : opt.minDate;
-            opt.maxDate = (opt.maxDate === null || minYear > maxYear) ? '2300,01,01' : opt.maxDate;
+            opt.maxDate = (opt.maxDate === null || minYear > maxYear) ? '2099,01,01' : opt.maxDate;
 
             // 一个星期的第一天是星期几
             var firstDay = parseInt(opt.firstDay);
@@ -131,14 +166,34 @@
             opt.i18n.weekdaysShot = afterDayShot.concat(beforeDayShot);
         },
 
-        // 渲染日历整体HTML
-        draw: function () {
+        // 初始化
+        init: function () {
+            this.curDate = new Date();  // 当前日期
+            this.component = {};        // 日历Dom组件集合
+            this.cell = {};             // 日期单元格的集合
+            this.cell.monthCells = [];  // 当前月份的天数单元格
+            this.cell.prevCells = [];   // 上个月的倒数几天单元格
+            this.cell.afterCells = [];  // 下个月的开始几天单元格
+            this.render();
+        },
+
+        // 渲染日历到页面
+        render: function () {
+            var onRender = this.options.onRender;
+
+
+            if (onRender && typeof onRender === 'function') {
+                onRender.call(self);
+            }
+        },
+
+        // 生成日历整体HTML结构
+        draw: function (year, month) {
             var cmp = this.component;
             cmp.picker = document.createElement('div');
             cmp.picker.className = 'date-picker';
             cmp.picker.appendChild(this.header());
-            cmp.picker.appendChild(this.body());
-            document.body.appendChild(cmp.picker);
+            cmp.picker.appendChild(this.body(year, month));
         },
 
         // 渲染日历头部
@@ -155,15 +210,15 @@
         },
 
         // 渲染日历主体
-        body: function () {
-            var cmp = this.component,
-                curYear = this.curDate.getFullYear(),
-                curMonth = this.curDate.getMonth();
+        body: function (year, month) {
+            var cmp = this.component/*,
+             year =  this.curDate.getFullYear(),
+             month = this.curDate.getMonth()*/;
 
             cmp.pickerBody = document.createElement('table');
             cmp.pickerBody.className = 'calendar-table';
             cmp.pickerBody.appendChild(this.weekNameRow());
-            cmp.pickerBody.appendChild(this.dayGrid(curYear, curMonth));
+            cmp.pickerBody.appendChild(this.dayGrid(year, month));
 
             return cmp.pickerBody;
         },
@@ -270,8 +325,7 @@
 
             // 将所有的单元格切割为长度为 7 的小数组，并添加到 tr 里去
             for (var j = 0; j < totalCell.length; j++) {
-                if(!(j % 7)) {
-                    console.log(j)
+                if (!(j % 7)) {
                     totalRow.push(this.renderRow(totalCell.slice(j, j + 7)));
                 }
             }
@@ -282,12 +336,12 @@
             return this.component.pickerGrid;
         },
 
-        // 渲染日期行
+        // 生成日期行
         renderRow: function (days) {
             return '<tr>' + days.join('') + '</tr>';
         },
 
-        // 渲染天数单元格，并添加必要的状态
+        // 生成日期单元格，并添加必要的状态
         renderDay: function (cellOpts) {
             var cell, classArr = [],
                 dateStr = cellOpts.year + ',' + (cellOpts.month + 1) + ',' + cellOpts.day;
@@ -311,22 +365,22 @@
         isFill: function (year, month) {
             var prevOpts, afterOpts, cellObj = this.cell, isFb = this.options.isFillBlank,
 
-                // 一个月的总天数
+            // 一个月的总天数
                 totalDay = getDayInMonth(year)[month],
 
-                // 上一月的总天数
+            // 上一月的总天数
                 prevTotalDay = getDayInMonth(year)[month - 1],
 
-                // 一个星期第一天的星期数
+            // 一个星期第一天的星期数
                 weekFirst = parseInt(this.options.firstDay),
 
-                // 一个月第一天的星期数
+            // 一个月第一天的星期数
                 monthFirst = new Date(year, month, 1).getDay(),
 
-                // 第一个星期的空白单元格数量
+            // 第一个星期的空白单元格数量
                 before = (monthFirst >= weekFirst) ? (monthFirst - weekFirst) : (7 - weekFirst + monthFirst),
 
-                // 最后一个星期空白单元格数量
+            // 最后一个星期空白单元格数量
                 after = 7 - (before + totalDay) % 7;
 
             // 获取上个月的倒数几天，并判断是否添加'空白'状态
@@ -343,8 +397,54 @@
                 isFb ? extend(afterOpts, {empty: true}) : extend(afterOpts, {disabled: true});
                 cellObj.afterCells.push(this.renderDay(afterOpts));
             }
+        },
+
+        // 格式化日期
+        formatDate: function (date) {
+            date = new Date(date);
+            var reformat,
+                format = this.options.format,
+                y = date.getFullYear(),
+                m = date.getMonth() + 1,
+                d = date.getDate();
+
+            switch (format) {
+                case 'YYYY/MM/DD':
+                    reformat = y + '/' + m + '/' + d;
+                    break;
+                case 'YYYY年MM月DD日':
+                    reformat = y + '年' + m + '月' + d + '日';
+                    break;
+                default:
+                    reformat = y + '-' + m + '-' + d;
+                    break;
+            }
+            return reformat;
+        },
+
+        // 下拉框change事件回调
+        onSelectChange: function () {
+            var select = this.childNodes[0],
+                val = select.value,
+                name = select.getAttribute('name');
+
+            // 重新渲染日期表格
+            if (name === 'calendar-select-year') {
+
+            } else if (name = 'calendar-select-month') {
+
+            }
+            console.log(name)
+        },
+
+        // 选择日期回调
+        onPickDay: function () {
+            var thisDate = this.getAttribute('data-date');
+            self.field.value = self.formatDate(thisDate);
+            addClass(this, 'calendar-cell-selected');
         }
     };
 
     return Picker;
-}));
+}))
+;
