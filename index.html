@@ -3,11 +3,13 @@
 <head lang="zh-CN">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>calendar</title>
+    <title></title>
     <link rel="stylesheet" href="style/style.css"/>
 </head>
 <body>
 <input type="text" id="start" value=""/>
+<div class="a"></div>
+
 
 <script src="src/datapicker.js"></script>
 <script>
@@ -16,17 +18,12 @@
         firstDay: 5,
         format: 'YYYY年MM月DD日',
         minDate: '1990/1/1',
-        maxDate: '2020/1/1',
-        onRender: function () {
-            alert(1)
-        }
+        maxDate: '2020/1/1'
         /*isFillBlank: true,
-        i18n: {
-            month: ['1','2','3','4','5','6','7','8','9','10','11','12'],
-            weekdaysShot: ['sun','mon','tue','win','thu','fri','sat']
-        }*/
+        month: ['1','2','3','4','5','6','7','8','9','10','11','12'],
+        weekdaysShot: ['sun','mon','tue','win','thu','fri','sat']*/
     });
-//    console.log(start)
+    console.log(start)
 </script>
 </body>
 </html>
