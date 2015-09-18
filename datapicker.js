@@ -6,7 +6,6 @@
         // AMD
         define([], factory);
     } else {
-        // Browser globals (root is window)
         root.datepicker = factory();
     }
 }(this, function () {
@@ -20,7 +19,7 @@
         // 格式化日期，可选项：'YYYY/MM/DD', 'YYYY年MM月DD日'
         format: 'YYYY-MM-DD',
 
-        // 初始化的值
+        // 初始化的日期值
         defaultDate: null,
 
         // 一周的开始星期（0: sunday, 1: monday etc.）
@@ -106,12 +105,6 @@
         }
     };
 
-    // 删除css class
-    var removeClass = function (node, classStr) {
-        var oldClass = node.className;
-
-    };
-
     // 获取一个月里有多少天
     var getDayInMonth = function (year) {
         var febDays = isLeapYear(year) ? 29 : 28;
@@ -122,19 +115,8 @@
     // ============================
     var Picker = function (options) {
         var self = this;
-
         self.config(options);
         self.init();
-
-        // 日期天数选择，并判断是否为'空白'或'禁用'状态，如果是，则不触发事件
-        /*var isEmpty, isDisable, dayCell = self.component.pickerBody.getElementsByTagName('td');
-        for (var i = 0; i < dayCell.length; i++) {
-            isEmpty = hasClass(dayCell[i], 'calendar-cell-empty');
-            isDisable = hasClass(dayCell[i], 'calendar-cell-disabled');
-            if (!(isEmpty || isDisable)) {
-                addEvent(dayCell[i], 'click', self.pickDay);
-            }
-        }*/
     };
 
     // 日历对象属性
@@ -158,7 +140,16 @@
             opt.minDate = (opt.minDate === null || minYear > maxYear) ? '1900,01,01' : opt.minDate;
             opt.maxDate = (opt.maxDate === null || minYear > maxYear) ? '2099,01,01' : opt.maxDate;
 
-            // 一个星期的第一天是星期几
+            // 默认日期, 并判断设置的日期是否在最大和最小日期之间
+            var minTime = new Date(opt.minDate).getTime();
+            var maxTime = new Date(opt.maxDate).getTime();
+            if(opt.defaultDate) {
+                var dftTime = new Date(opt.defaultDate).getTime();
+                (dftTime > maxTime) && (opt.defaultDate = opt.maxDate);
+                (dftTime < minTime) && (opt.defaultDate = opt.minDate);
+            }
+
+            // 设置一个星期的第一天是星期几
             var firstDay = parseInt(opt.firstDay);
             opt.firstDay = (firstDay > 6 || firstDay < 0) ? 0 : firstDay;
             var beforeDayShot = opt.i18n.weekdaysShot.slice(0, opt.firstDay);
@@ -177,63 +168,68 @@
             this.render();
         },
 
-        // 渲染日历到页面
+        // 渲染日历到页面，并绑定基本事件
         render: function () {
-            var onRender = this.options.onRender;
+            var self = this;
+            var onRender = self.options.onRender;
+            document.body.appendChild(self.draw());
 
-
+            // 渲染完成时的回调函数
             if (onRender && typeof onRender === 'function') {
                 onRender.call(self);
             }
         },
 
-        // 生成日历整体HTML结构
-        draw: function (year, month) {
-            var cmp = this.component;
-            cmp.picker = document.createElement('div');
-            cmp.picker.className = 'date-picker';
-            cmp.picker.appendChild(this.header());
-            cmp.picker.appendChild(this.body(year, month));
+        /**
+         * 生成日历整体HTML结构
+         * 先判断是否有传参，如果没有，则检查是否有默认值，如果没有默认值，就使用当前日期
+         * @param year  {number}    [可选]需要设置的年份
+         * @param month {number}    [可选]需要设置的月份
+         * @param day   {number}    [可选]需要设置的天数
+         * @returns {Element|*}
+         */
+        draw: function (year, month, day) {
+            var dftDate = this.options.defaultDate;
+            year = year || ( dftDate ? new Date(dftDate).getFullYear() : this.curDate.getFullYear() );
+            month = month || ( dftDate ? new Date(dftDate).getMonth() : this.curDate.getMonth() );
+            day = day || ( dftDate ? new Date(dftDate).getDate() : this.curDate.getDate() );
+            this.component.picker = document.createElement('div');
+            this.component.picker.className = 'date-picker';
+            this.component.picker.appendChild(this.header(year, month));
+            this.component.picker.appendChild(this.body(year, month, day));
+            return this.component.picker;
         },
 
         // 渲染日历头部
-        header: function () {
-            var cmp = this.component;
-            cmp.pickerHeader = document.createElement('div');
-            cmp.pickerHeader.className = 'calendar-header';
-            cmp.pickerHeader.appendChild(this.yearSelect());
-            cmp.pickerHeader.appendChild(this.monthSelect());
-            cmp.pickerHeader.appendChild(this.prevMonthBtn());
-            cmp.pickerHeader.appendChild(this.nextMonthBtn());
-
-            return cmp.pickerHeader;
+        header: function (year, month) {
+            var pickerHeader = document.createElement('div');
+            pickerHeader.className = 'calendar-header';
+            pickerHeader.appendChild(this.yearSelect(year));
+            pickerHeader.appendChild(this.monthSelect(month));
+            pickerHeader.appendChild(this.prevMonthBtn());
+            pickerHeader.appendChild(this.nextMonthBtn());
+            return pickerHeader;
         },
 
         // 渲染日历主体
-        body: function (year, month) {
-            var cmp = this.component/*,
-             year =  this.curDate.getFullYear(),
-             month = this.curDate.getMonth()*/;
-
-            cmp.pickerBody = document.createElement('table');
-            cmp.pickerBody.className = 'calendar-table';
-            cmp.pickerBody.appendChild(this.weekNameRow());
-            cmp.pickerBody.appendChild(this.dayGrid(year, month));
-
-            return cmp.pickerBody;
+        body: function (year, month, day) {
+            var pickerBody = document.createElement('table');
+            pickerBody.className = 'calendar-table';
+            pickerBody.appendChild(this.weekNameRow());
+            pickerBody.appendChild(this.dayGrid(year, month, day));
+            return pickerBody;
         },
 
         // 年份下拉列表，并判断年份区间
-        yearSelect: function () {
+        yearSelect: function (year) {
             var i, yearHtml, cmp = this.component,
                 startYear = new Date(this.options.minDate).getFullYear() - 1,
                 endYear = new Date(this.options.maxDate).getFullYear(),
-                curYear = this.curDate.getFullYear();
 
             yearHtml = '<select name="calendar-select-year">';
             for (i = endYear; i > startYear; i--) {
-                (curYear === i) ? yearHtml += '<option value="' + i + '" selected>' + i + '</option>'
-                    : yearHtml += '<option value="' + i + '">' + i + '</option>';
+                yearHtml += (year === i) ? '<option value="' + i + '" selected>' + i + '</option>'
+                    : '<option value="' + i + '">' + i + '</option>';
             }
             yearHtml += '</select>';
 
@@ -245,17 +241,16 @@
         },
 
         // 月份下拉列表，并选中当前月份
-        monthSelect: function () {
+        monthSelect: function (month) {
             var i, monthHtml,
                 cmp = this.component,
                 monthOpt = this.options.i18n.month,
-                curMonth = this.curDate.getMonth();
 
             monthHtml = '<select name="calendar-select-month">';
             for (i = 0; i < 12; i++) {
-                (curMonth === i)
-                    ? monthHtml += '<option value="' + i + '" selected>' + monthOpt[i] + '</option>'
-                    : monthHtml += '<option value="' + i + '">' + monthOpt[i] + '</option>';
+                monthHtml += (month === i)
+                    ? '<option value="' + i + '" selected>' + monthOpt[i] + '</option>'
+                    : '<option value="' + i + '">' + monthOpt[i] + '</option>';
             }
             monthHtml += '</select>';
 
@@ -272,7 +267,6 @@
             cmp.prevBtn = document.createElement('button');
             cmp.prevBtn.className = 'calendar-btn calendar-prev';
             cmp.prevBtn.innerHTML = '&lt;';
-
             return cmp.prevBtn;
         },
 
@@ -282,7 +276,6 @@
             cmp.nextBtn = document.createElement('button');
             cmp.nextBtn.className = 'calendar-btn calendar-next';
             cmp.nextBtn.innerHTML = '&gt;';
-
             return cmp.nextBtn;
         },
 
@@ -305,18 +298,17 @@
         },
 
         // 根据年月，来生成相应的日期表格
-        dayGrid: function (year, month) {
+        dayGrid: function (year, month, day) {
             var dayOpts, totalRow = [], totalCell = [],
                 cellObj = this.cell,
-                totalDay = getDayInMonth(year)[month],
-                curDay = parseInt(this.curDate.getDate());
+                totalDay = getDayInMonth(year)[month];
 
-            this.isFill(year, month);
+            this.getFill(year, month);
 
             // 获取当前月份的天数，并对当前天，添加选中状态
             for (var i = 1; i <= totalDay; i++) {
                 dayOpts = {year: year, month: month, day: i};
-                (i === curDay) ? extend(dayOpts, {selected: true}) : dayOpts;
+                (i === day) ? extend(dayOpts, {selected: true}) : dayOpts;
                 cellObj.monthCells.push(this.renderDay(dayOpts));
             }
 
@@ -361,8 +353,8 @@
             return cell;
         },
 
-        // 获取月份的前后单元格，并判断是否添加'空白'状态
-        isFill: function (year, month) {
+        // 获取月份的前后单元格，并判断是否设置'空白'状态
+        getFill: function (year, month) {
             var prevOpts, afterOpts, cellObj = this.cell, isFb = this.options.isFillBlank,
 
             // 一个月的总天数
@@ -399,6 +391,15 @@
             }
         },
 
+        // 更改年份或月份时，重新渲染日历
+        onDateChange: function (select) {
+            var val;
+            addEvent(select, 'change', function () {
+                val = parseInt(this.value);
+            });
+
+        },
+
         // 格式化日期
         formatDate: function (date) {
             date = new Date(date);
@@ -420,31 +421,8 @@
                     break;
             }
             return reformat;
-        },
-
-        // 下拉框change事件回调
-        onSelectChange: function () {
-            var select = this.childNodes[0],
-                val = select.value,
-                name = select.getAttribute('name');
-
-            // 重新渲染日期表格
-            if (name === 'calendar-select-year') {
-
-            } else if (name = 'calendar-select-month') {
-
-            }
-            console.log(name)
-        },
-
-        // 选择日期回调
-        onPickDay: function () {
-            var thisDate = this.getAttribute('data-date');
-            self.field.value = self.formatDate(thisDate);
-            addClass(this, 'calendar-cell-selected');
         }
     };
 
     return Picker;
-}))
-;
+}));
