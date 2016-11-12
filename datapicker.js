@@ -62,6 +62,7 @@
     };
 
     // 合并对象
+    // todo: 未进行hasOwnProperty检查
     var extend = function (to, from, overwrite) {
         overwrite = overwrite || false;
         var prop, hasProp;
@@ -170,8 +171,9 @@
 
         // 渲染日历到页面，并绑定基本事件
         render: function () {
-            var self = this;
-            var onRender = self.options.onRender;
+            var self = this,
+                onRender = self.options.onRender;
+
             document.body.appendChild(self.draw());
 
             // 渲染完成时的回调函数
@@ -181,7 +183,7 @@
         },
 
         /**
-         * 生成日历整体HTML结构
+         * 生成日历整体HTML结构（日历的外层div，header，body）
          * 先判断是否有传参，如果没有，则检查是否有默认值，如果没有默认值，就使用当前日期
          * @param year  {number}    [可选]需要设置的年份
          * @param month {number}    [可选]需要设置的月份
@@ -222,14 +224,17 @@
 
         // 年份下拉列表，并判断年份区间
         yearSelect: function (year) {
-            var i, yearHtml, cmp = this.component,
-                startYear = new Date(this.options.minDate).getFullYear() - 1,
+            var startYear = new Date(this.options.minDate).getFullYear() - 1,
                 endYear = new Date(this.options.maxDate).getFullYear(),
+                cmp = this.component,
+                yearHtml,
+                i;
 
             yearHtml = '<select name="calendar-select-year">';
             for (i = endYear; i > startYear; i--) {
-                yearHtml += (year === i) ? '<option value="' + i + '" selected>' + i + '</option>'
-                    : '<option value="' + i + '">' + i + '</option>';
+                yearHtml += (year === i)
+                         ? '<option value="' + i + '" selected>' + i + '</option>'
+                         :  '<option value="' + i + '">' + i + '</option>';
             }
             yearHtml += '</select>';
 
@@ -242,15 +247,16 @@
 
         // 月份下拉列表，并选中当前月份
         monthSelect: function (month) {
-            var i, monthHtml,
+            var monthOpt = this.options.i18n.month,
                 cmp = this.component,
-                monthOpt = this.options.i18n.month,
+                monthHtml,
+                i;
 
             monthHtml = '<select name="calendar-select-month">';
             for (i = 0; i < 12; i++) {
                 monthHtml += (month === i)
-                    ? '<option value="' + i + '" selected>' + monthOpt[i] + '</option>'
-                    : '<option value="' + i + '">' + monthOpt[i] + '</option>';
+                          ? '<option value="' + i + '" selected>' + monthOpt[i] + '</option>'
+                          : '<option value="' + i + '">' + monthOpt[i] + '</option>';
             }
             monthHtml += '</select>';
 
@@ -281,9 +287,10 @@
 
         // 星期名称
         weekNameRow: function () {
-            var i, titleHtml,
+            var weekOpt = this.options.i18n.weekdaysShot,
                 cmp = this.component,
-                weekOpt = this.options.i18n.weekdaysShot;
+                titleHtml,
+                i;
 
             titleHtml = '<tr>';
             for (i = 0; i < 7; i++) {
@@ -299,11 +306,13 @@
 
         // 根据年月，来生成相应的日期表格
         dayGrid: function (year, month, day) {
-            var dayOpts, totalRow = [], totalCell = [],
+            var totalDay = getDayInMonth(year)[month],
                 cellObj = this.cell,
-                totalDay = getDayInMonth(year)[month];
+                totalRow = [],
+                totalCell = [],
+                dayOpts;
 
-            this.getFill(year, month);
+                this.getFill(year, month);
 
             // 获取当前月份的天数，并对当前天，添加选中状态
             for (var i = 1; i <= totalDay; i++) {
@@ -334,11 +343,13 @@
         },
 
         // 生成日期单元格，并添加必要的状态
+        // todo: 单元格中，上月和下月的月份字符串错误
         renderDay: function (cellOpts) {
-            var cell, classArr = [],
-                dateStr = cellOpts.year + ',' + (cellOpts.month + 1) + ',' + cellOpts.day;
+            var dateStr = cellOpts.year + ',' + (cellOpts.month + 1) + ',' + cellOpts.day,
+                classArr = [],
+                cell;
 
-            if (cellOpts.disabled) {
+                if (cellOpts.disabled) {
                 // 设置'禁用'状态
                 classArr.push('calendar-cell-disabled');
             } else if (cellOpts.selected) {
@@ -355,25 +366,17 @@
 
         // 获取月份的前后单元格，并判断是否设置'空白'状态
         getFill: function (year, month) {
-            var prevOpts, afterOpts, cellObj = this.cell, isFb = this.options.isFillBlank,
-
-            // 一个月的总天数
-                totalDay = getDayInMonth(year)[month],
-
-            // 上一月的总天数
-                prevTotalDay = getDayInMonth(year)[month - 1],
-
-            // 一个星期第一天的星期数
-                weekFirst = parseInt(this.options.firstDay),
-
-            // 一个月第一天的星期数
-                monthFirst = new Date(year, month, 1).getDay(),
-
-            // 第一个星期的空白单元格数量
-                before = (monthFirst >= weekFirst) ? (monthFirst - weekFirst) : (7 - weekFirst + monthFirst),
-
-            // 最后一个星期空白单元格数量
-                after = 7 - (before + totalDay) % 7;
+            var totalDay = getDayInMonth(year)[month],  // 一个月的总天数
+                prevTotalDay = getDayInMonth(year)[month - 1],  // 上一月的总天数
+                weekFirst = parseInt(this.options.firstDay),    // 一个星期第一天的星期数
+                monthFirst = new Date(year, month, 1).getDay(), // 一个月第一天的星期数
+                before = (monthFirst >= weekFirst) ?
+                         (monthFirst - weekFirst) : (7 - weekFirst + monthFirst),   // 第一个星期的空白单元格数量
+                after = 7 - (before + totalDay) % 7,    // 最后一个星期空白单元格数量
+                cellObj = this.cell,
+                isFb = this.options.isFillBlank,
+                prevOpts,
+                afterOpts;
 
             // 获取上个月的倒数几天，并判断是否添加'空白'状态
             for (var i = 0; i < before; i++) {
